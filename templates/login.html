@@ -1,0 +1,76 @@
+{% extends 'base.html' %}
+
+{% block title %}Login{% endblock %}
+
+{% block content %}
+<h1>Login</h1>
+
+<form method="post" action="{{ url_for('login') }}" onsubmit="return validateCaptcha()">
+    <label for="username">Username:</label><br>
+    <input type="text" id="username" name="username" required><br><br>
+
+    <label for="password">Password:</label><br>
+    <input type="password" id="password" name="password" required><br><br>
+
+    <label>CAPTCHA:</label><br>
+    <canvas id="captchaCanvas" width="200" height="50"></canvas><br>
+    <input type="text" id="captcha_input" name="captcha_input" placeholder="Enter CAPTCHA" required>
+    <button type="button" onclick="generateCaptcha()">Refresh CAPTCHA</button><br><br>
+
+    <button type="submit">Login</button>
+    
+    <a href="/signup">
+        <button type="button">Register</button>
+    </a>
+
+    <p id="captcha_message" style="color:red;"></p>
+</form>
+
+<script>
+    let generatedCaptcha = '';
+
+    function generateCaptcha() {
+        const canvas = document.getElementById('captchaCanvas');
+        const ctx = canvas.getContext('2d');
+        const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+        generatedCaptcha = '';
+
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        ctx.fillStyle = '#f2f2f2';
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+        for (let i = 0; i < 5; i++) {
+            generatedCaptcha += chars.charAt(Math.floor(Math.random() * chars.length));
+        }
+
+        ctx.font = '24px monospace';
+        ctx.fillStyle = '#000';
+        ctx.fillText(generatedCaptcha, 30, 30);
+
+        // Light noise
+        for (let i = 0; i < 5; i++) {
+            ctx.strokeStyle = 'rgba(0,0,0,0.1)';
+            ctx.beginPath();
+            ctx.moveTo(Math.random() * canvas.width, Math.random() * canvas.height);
+            ctx.lineTo(Math.random() * canvas.width, Math.random() * canvas.height);
+            ctx.stroke();
+        }
+    }
+
+    function validateCaptcha() {
+        const userInput = document.getElementById('captcha_input').value.trim();
+        const msg = document.getElementById('captcha_message');
+
+        if (userInput !== generatedCaptcha) {
+            msg.textContent = 'Incorrect CAPTCHA. Please try again.';
+            generateCaptcha(); // Refresh CAPTCHA
+            return false;
+        }
+
+        msg.textContent = '';
+        return true;
+    }
+
+    window.onload = generateCaptcha;
+</script>
+{% endblock %}

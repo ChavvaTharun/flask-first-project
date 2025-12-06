@@ -1,0 +1,191 @@
+{% extends 'base.html' %}
+
+{% block title %}Sign Up{% endblock %}
+
+{% block content %}
+
+<!-- Styles -->
+<style>
+    /* General Styles */
+    body {
+        font-family: Arial, sans-serif;
+        background-color: #f4f4f4;
+        margin: 0;
+        padding: 0;
+    }
+
+    /* Header Styles */
+    h1 {
+        text-align: center;
+        margin-top: 40px;
+        color: #333;
+    }
+
+    /* Form Styles */
+    form {
+        background-color: #fff;
+        padding: 20px;
+        border-radius: 8px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        max-width: 600px;
+        margin: 20px auto;
+    }
+
+    /* Label Styles */
+    label {
+        font-weight: bold;
+        display: block;
+        margin-bottom: 4px;
+        color: #555;
+    }
+
+    /* Input Field Styles */
+    input[type="text"],
+    input[type="email"],
+    input[type="password"] {
+        width: 100%;
+        padding: 8px;
+        margin-bottom: 12px;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+        box-sizing: border-box;
+        font-size: 14px;
+    }
+
+    /* Button Styles */
+    button[type="submit"] {
+        width: 100%;
+        padding: 10px;
+        background-color: #007bff;
+        color: white;
+        border: none;
+        border-radius: 4px;
+        font-size: 16px;
+        cursor: pointer;
+        transition: background-color 0.3s ease;
+    }
+
+    button[type="submit"]:hover {
+        background-color: #0056b3;
+    }
+
+    /* CAPTCHA Styles */
+    canvas {
+        border: 1px solid #ccc;
+        display: block;
+        margin-bottom: 10px;
+    }
+
+    input, button {
+        padding: 8px;
+        font-size: 16px;
+    }
+
+    #result {
+        font-weight: bold;
+        margin-top: 10px;
+    }
+</style>
+
+<h1>Sign Up</h1>
+
+<form method="POST" action="{{ url_for('signup') }}" onsubmit="return validateCaptchaBeforeSubmit()">
+    <label for="username">Username:</label><br>
+    <input type="text" id="username" name="username" required><br><br>
+
+    <label for="password">Password:</label><br>
+    <input type="password" id="password" name="password" required><br><br>
+
+    <label for="email">Email:</label><br>
+    <input type="email" id="email" name="email" required><br><br>
+
+    <label for="phone_number">Phone Number:</label><br>
+    <input type="text" id="phone_number" name="phone_number" required><br><br>
+
+    <label for="country">Country:</label><br>
+    <input type="text" id="country" name="country" required><br><br>
+
+    <label for="city">City:</label><br>
+    <input type="text" id="city" name="city" required><br><br>
+
+    <label for="pincode">Pincode:</label><br>
+    <input type="text" id="pincode" name="pincode" required><br><br>
+
+    <!-- CAPTCHA -->
+    <canvas id="captchaCanvas" width="200" height="60"></canvas>
+    <input type="text" id="userInput" placeholder="Enter CAPTCHA" required>
+    <button type="button" onclick="generateCaptcha()">Refresh CAPTCHA</button>
+
+    <p id="result"></p>
+
+    <!-- Hidden field to store CAPTCHA for validation -->
+    <input type="hidden" id="captcha" name="captcha" value="{{ generatedCaptcha }}">
+
+    <button type="submit">Sign Up</button>
+</form>
+
+<p>Already have an account? <a href="{{ url_for('login') }}">Login here</a></p>
+
+<!-- CAPTCHA Script -->
+<script>
+    let generatedCaptcha = '{{ generatedCaptcha }}';  // Get the server-generated CAPTCHA value
+
+    // Function to generate and display CAPTCHA
+    function generateCaptcha() {
+        const canvas = document.getElementById('captchaCanvas');
+        const ctx = canvas.getContext('2d');
+        const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+
+        // Clear canvas
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+        // Light background
+        ctx.fillStyle = '#f2f2f2';
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+        // Generate CAPTCHA string
+        generatedCaptcha = '';
+        for (let i = 0; i < 5; i++) {
+            generatedCaptcha += chars.charAt(Math.floor(Math.random() * chars.length));
+        }
+
+        // Draw CAPTCHA text on canvas
+        ctx.font = '28px monospace';
+        ctx.fillStyle = '#000';
+        ctx.textBaseline = 'middle';
+        ctx.fillText(generatedCaptcha, 30, canvas.height / 2);
+
+        // Draw random lines (noise) on canvas
+        for (let i = 0; i < 5; i++) {
+            ctx.strokeStyle = 'rgba(0,0,0,0.1)';
+            ctx.beginPath();
+            ctx.moveTo(Math.random() * canvas.width, Math.random() * canvas.height);
+            ctx.lineTo(Math.random() * canvas.width, Math.random() * canvas.height);
+            ctx.stroke();
+        }
+
+        // Clear previous CAPTCHA validation result
+        document.getElementById('result').textContent = '';
+    }
+
+    // Function to validate CAPTCHA before form submission
+    function validateCaptchaBeforeSubmit() {
+        const userInput = document.getElementById('userInput').value.trim();
+        const result = document.getElementById('result');
+
+        if (userInput === generatedCaptcha) {
+            // Store CAPTCHA value in the hidden input field
+            document.getElementById('captcha').value = generatedCaptcha;
+            return true;  // Allow form submission
+        } else {
+            result.style.color = 'red';
+            result.textContent = 'Incorrect CAPTCHA. Try again.';
+            return false;  // Prevent form submission
+        }
+    }
+
+    // Generate CAPTCHA when page loads
+    window.onload = generateCaptcha;
+</script>
+
+{% endblock %}

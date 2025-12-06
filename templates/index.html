@@ -1,0 +1,28 @@
+{% extends 'base.html' %}
+
+{% block title %}Home{% endblock %}
+
+{% block content %}
+<h1>Welcome to <strong>{{ username }}</strong> 👋</h1>
+<p>This is the homepage.</p>
+
+<div class="container">
+  <div class="row">
+    <div class="col-lg-8"></div>
+    <div class="col-lg-4">
+      <h2>User Details</h2>
+      {% if username %}
+      <ul>
+        <li>Email: {{ email }}</li>
+        <li>Phone: {{ phone_number }}</li>
+        <li>Country: {{ country }}</li>
+        <li>City: {{ city }}</li>
+        <li>Pincode: {{ pincode }}</li>
+      </ul>
+      {% else %}
+        <p>Please log in to view your profile.</p>
+      {% endif %}
+    </div>
+  </div>
+</div>
+{% endblock %}
